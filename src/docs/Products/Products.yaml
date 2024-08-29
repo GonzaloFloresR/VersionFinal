@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: API de Lista del Sol
+  description: E-Commerce - CRUD Productos
+  version: 1.0.0
+paths:
+  /api/products/:
+    get:
+      summary: Obtener lista de artículos
+      tags: 
+        - Products
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/product'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Los limites deben ser datos numericos
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error inesperado en el servidor - intente más tarde
+                  detalle:
+                    type: string
+                    example: Error especifico
+    post:
+      summary: Crear un Producto
+      tags: 
+        - Products
+      requestBody:
+        description: Datos requeridos por el endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                thumbnail:
+                  type: string
+                code:
+                  type: string
+                stock:
+                  type: integer
+                owner:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: ObjectId
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      price:
+                        type: number
+                      thumbnail:
+                        type: string
+                      code:
+                        type: string
+                        required: true
+                      owner:
+                        type: string
+                        format: ObjectId
+                      stock:
+                        type: integer
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      __v:
+                        type: integer
+                      id:
+                        type: string
+                        format: ObjectId
+        '400_Verificando_Body':
+          description: valores requeridos title, description, price, code, stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400_Rol_User':
+          description: Solo usuario Premium pueden agregar productos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error inesperado en el servidor - intente más tarde
+                  detalle:
+                    type: string
+                    example: Error especifico
+
+  /api/products/{pid}:
+    get:
+      summary: Obtener producto por ID
+      parameters:
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del producto
+      tags: 
+        - Products
+      responses:
+        '200':
+          description: Producto Obtenido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product'
+        '400_ID_Mongo_Invalido':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Ingrese un ID valido de MongoDB
+        '400_PID_NO_Existe':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No existe producto con ID ${pid}
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error inesperado en el servidor - intente más tarde
+                  detalle:
+                    type: string
+                    example: Error especifico
+    put:
+      summary: Modificar producto por ID
+      parameters:
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del producto
+      tags: 
+        - Products
+      requestBody:
+        description: Datos requeridos por el endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  required: false
+                description:
+                  type: string
+                  required: false
+                price:
+                  type: number
+                  required: false
+                thumbnail:
+                  type: string
+                  required: false
+                code:
+                  type: string
+                  required: false
+                stock:
+                  type: integer
+                  required: false
+                owner:
+                  type: string
+                  required: false
+          multipart/form-data:
+            schema:
+              type: object
+              required: false
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Producto Modificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product'
+        '400_ID_Mongo_Invalido':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Ingrese un ID valido de MongoDB
+        '400_PID_NO_Existe':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No existe producto con ID ${pid}
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error inesperado en el servidor - intente más tarde
+                  detalle:
+                    type: string
+                    example: Error especifico
+    delete:
+      summary: Eliminar producto por ID
+      parameters:
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del producto
+      tags: 
+        - Products
+      responses:
+        '200':
+          description: Producto Eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: string
+                    examplet: succes
+                  message:
+                    type: string
+                    example: Producto con ID ${pid} Eliminado
+        '400_ID_Mongo_Invalido':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Ingrese un ID valido de MongoDB
+        '400_PID_NO_Existe':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No existe producto con ID ${pid}
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error inesperado en el servidor - intente más tarde
+                  detalle:
+                    type: string
+                    example: Error especifico
+
+components:
+  schemas:
+    product:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: Id autogenerado por MongoDB
+          example: 66a6dbcebcf83d8b420f898a
+        title:
+          type: string
+          description: "Descripción corta del producto"
+          example: "Pulpo fresco"
+        description:
+          type: string
+          description:  Descripción más detallada del producto
+          example: "Riquisimo Pulpo fresco del Oceano Pacífico"
+        price:
+          type: number
+          example: 32000
+        thumbnail:
+          type: string
+          format: url
+          example: "../img/Pulpo.jpeg"
+        code:
+          type: string
+          description: No se puede repetir dentro de la Base de Datos
+          example: "Octopus008"
+          required: true
+          unique: true
+        owner:
+          type: string
+          description: Id del Provedor del producto
+          example: 666307ea1d8fa9726e252555
+          format: ObjectId
+        stock:
+          type: integer
+          description: Cantidad de productos en stock
+          example: 10
+        createdAt:
+          type: string
+          format: Date
+          example: "2024-07-28T23:25:21.447Z"
+          description: Información autogenerada por MongoDB
+        updatedAt:
+          type: string
+          format: Date
+          example: "2024-07-29T12:54:01.228Z"
+          description: Información autogenerada por MongoDB
+        __v:
+          type: integer
+          description: Información autogenerada por MongoDB
+        id:
+          type: string
+          format: ObjectId
+          description: Id autogenerado por MongoDB
+          example: "66a6d2fcbcf83d8b420f8868"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example:
+          description: Mensaje de error

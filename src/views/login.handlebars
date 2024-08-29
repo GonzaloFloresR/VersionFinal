@@ -1,0 +1,38 @@
+<header>
+    <div id="PreHeader">
+        {{> submenu}}
+    </div>
+    <div id="MainHeader">
+        <div id="LogoHeader">Lista del Sol</div>
+        <div id="MenuHeader">{{>menu}}</div>
+    </div>
+</header>
+
+<main>
+    <div id="container" >
+        <h1>Login de usuarios</h1>
+        <h2 id="MensajeError">Ingresar su Usuario (correo eléctronico) y contraseña</h2>
+        <form class="formSession" onsubmit="login(event)" autocomplete="off"> 
+        {{#if error}}
+            <div class="error">{{error}}</div>
+            {{else if message}}
+            <div class="succes">{{message}}</div>
+        {{/if}}
+            <input type="email" name="usuario" id="usuario" placeholder="Correo Electrónico" />
+            <input type="password" name="password" id="password" placeholder="Password" />
+            <input type="text" name="web" value="web" hidden />
+            <input type="submit" value="Ingresar">
+        </form>
+        <a href="/api/sessions/github" title="Acceder con Github" class="github">Acceder con Github</a>
+        <div class="minimalista"><a href="./recuperar.html">¿Olvidaste tu contraseña?</a></div>
+    </div>
+</main>
+<script src="./js/login.js" type="text/javascript"></script>
+<footer>
+    <ul>
+        <li><a href="/home" >Página de Inicio</a></li>
+    </ul>
+    
+</footer>
+
+

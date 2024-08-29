@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../img/icon.ico">
+    <link href="./css/estilo.css" rel="stylesheet" />
+    <title>Recuperar Contraseña</title>
+</head>
+<body>
+    <div class="minimalista">
+        <h1>Ayuda con la contraseña</h1>
+        <p>Escribe la dirección de correo electrónico asociado a tu cuenta</p>
+
+        <h3>Dirección de correo electrónico</h3>
+        <form id="emailForm" >
+            <input type="email" id="email" placeholder="email@ejemplo.com" required/>
+            <button type="submit">Continuar</button>
+        </form>
+        <div id="resultado"></div>
+        
+    </div>
+</body>
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
+            let email = document.getElementById('email').value;
+            let resultado = document.getElementById('resultado');
+            let respuesta;
+            try {
+                respuesta = await fetch("http://localhost:8080/resetpassword/", {
+                method: "post",
+                body: JSON.stringify({email}),
+                headers: {"Content-type": "application/json; charset=UTF-8"}
+            });
+            let mensaje = await respuesta.json();
+            resultado.innerHTML = `<h4>${mensaje.respuesta}</h4>`;
+        }
+        catch(error){console.log(error)}
+            
+        });
+    </script>
+</html>

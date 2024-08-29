@@ -1,0 +1,420 @@
+openapi: 3.0.0
+info:
+  title: API de Lista del Sol
+  description: E-Commerce CRUD Carts
+  version: 1.0.0
+paths:
+  /api/carts/:
+    get:
+      summary: Obtener lista de Carritos
+      tags: 
+        - Carts
+      responses:
+        '200':
+          description: Lista de Carritos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No hay carritos activos ❌
+        '500':
+          description: Error inesperado en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error inesperado en el servidor - intente más tarde"
+                  detalle:
+                    type: string
+                    example: "Detalle del Error"
+    post:
+      summary: Crear Carrito con productos y cantidades
+      tags: 
+        - Carts
+      requestBody:
+        description: Datos requeridos por el endpoint - Lista de Productos y Cantidades
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                products:
+                  description: Lista de productos y cantidades que contendrá el Carrito
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                        format: ObjectId
+                        example: "66a6cfdfbcf83d8b420f881c"
+                      quantity:
+                        type: integer
+                        example: 2
+      responses:
+        '200':
+          description: Carrito Creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          format: ObjectId
+                          example: "66a6cfdfbcf83d8b420f881c"
+                        quantity:
+                          type: integer
+                          example: 1
+                        _id:
+                          type: string
+                          format: ObjectId
+                          example: "66b02ed44681a445cf4cc57f"
+                  _id:
+                    type: string
+                    format: ObjectId
+                    example: "66b02ed44681a445cf4cc57e"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-08-05T01:45:56.337Z"
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-08-05T01:45:56.337Z"
+                  __v:
+                    type: integer
+                    example: 0
+
+  /api/carts/{cid}:
+    get:
+      summary: Obtener Cart por ID
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del carrito
+      tags: 
+        - Carts
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '400_CID':
+          description: El CID no es un ObjectId válido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Ingrese un ID Valido de Mongo
+        '400_CART':
+          description: No existe Cart con CID solicitado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No existe carrito con el ID {cid}
+    put:
+      summary: Modificar Carrito CID 
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del carrito
+      requestBody:
+        description: Datos requeridos por el endpoint - Lista de Productos y Cantidades 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: ObjectId
+                  quantity:
+                    type: integer
+                    example: 3
+      tags: 
+        - Carts
+      responses:
+        '200':
+          description: Carrito modificado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  succes:
+                    type: string
+                    example: Productos agregado con existo
+        '400':
+          description: Falta el req.body con las modificaciones a desarrollar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Debe Agregar productos al carrito
+        '500':
+          description: Error inesperado en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error inesperado en el servidor - intente más tarde"
+                  detalle:
+                    type: string
+                    example: "Detalle del Error"
+  /{cid}/products/{pid}:
+    put:
+      summary: Modificar Producto PID del Carrito CID
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del carrito
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del Producto a modificar
+      requestBody:
+        description: Datos requeridos por el endpoint - Lista de Productos y Cantidades 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: ObjectId
+                  quantity:
+                    type: integer
+                    example: 2
+      tags: 
+        - Carts
+      responses:
+        '200':
+          description: Producto PID en Carrito CID modificado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  succes:
+                    type: string
+                    example: CANTIDAD Producto/s PID, agregado/s en carrito CID
+        '400_IDs':
+          description: Uno o más Ids ingresados son Invalidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Verifique que los IDs ingresados sean validos
+    delete:
+      summary: Eliminar Producto PID del Carrito CID
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del carrito
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+          description: ObjectId del Producto a modificar
+      requestBody:
+        description: Datos requeridos por el endpoint - Lista de Productos y Cantidades 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: ObjectId
+                  quantity:
+                    type: integer
+                    example: 2
+      tags: 
+        - Carts
+      responses:
+        '200':
+          description: Producto PID eliminado del Carrito CID exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  succes:
+                    type: string
+                    example: "Se elimino: CANTIDAD Producto/s PID del carrito CID"
+        '400_IDs':
+          description: Uno o más Ids ingresados son Invalidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Verifique que los IDs ingresados sean validos
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: Id autogenerado por MongoDB
+          example: '66a6dbcebcf83d8b420f898a'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/products'
+        createdAt:
+          type: string
+          format: Date
+          example: "2024-07-28T23:25:21.447Z"
+          description: Información autogenerada por MongoDB
+        updatedAt:
+          type: string
+          format: Date
+          example: "2024-07-29T12:54:01.228Z"
+          description: Información autogenerada por MongoDB
+        __v:
+          type: integer
+          description: Información autogenerada por MongoDB
+
+    products:
+      type: object
+      properties:
+        productId:
+          type: object
+          properties:
+            _id:
+              type: string
+              format: ObjectId
+              description: Id autogenerado por MongoDB
+              example: 66a6dbcebcf83d8b420f898a
+            title:
+              type: string
+              description: "Descripción corta del producto"
+              example: "Pulpo fresco"
+            description:
+              type: string
+              description:  Descripción más detallada del producto
+              example: "Riquisimo Pulpo fresco del Oceano Pacífico"
+            price:
+              type: number
+              example: 32000
+            thumbnail:
+              type: string
+              format: url
+              example: "../img/Pulpo.jpeg"
+            code:
+              type: string
+              description: No se puede repetir dentro de la Base de Datos
+              example: "Octopus008"
+              required: true
+              unique: true
+            owner:
+              type: string
+              description: Id del Provedor del producto
+              example: 666307ea1d8fa9726e252555
+              format: ObjectId
+            stock:
+              type: integer
+              description: Cantidad de productos en stock
+              example: 10
+            createdAt:
+              type: string
+              format: Date
+              example: "2024-07-28T23:25:21.447Z"
+              description: Información autogenerada por MongoDB
+            updatedAt:
+              type: string
+              format: Date
+              example: "2024-07-29T12:54:01.228Z"
+              description: Información autogenerada por MongoDB
+            __v:
+              type: integer
+              description: Información autogenerada por MongoDB
+            id:
+              type: string
+              format: ObjectId
+              description: Id autogenerado por MongoDB
+              example: "66a6d2fcbcf83d8b420f8868"
+        quantity:
+          type: integer
+          example: 1
+        _id:
+          type: ObjectId
+          description: Otro Id generado por MongoDB
+          example: '66a790e1e6e203f07a7b1a36'
