@@ -39,8 +39,8 @@ describe("Pruebas Proyecto ECommerce", function(){
 
         after(async function(){
             this.timeout(10000);
-            //await mongoose.connection.collection("products").deleteMany({code:"FriedCakes"});
-            fs.unlinkSync(`${__dirname}/public/img/TortaFritas.jpeg`);
+            await mongoose.connection.collection("products").deleteMany({code:"FriedCakes"});
+            fs.unlinkSync(`${__dirname}/public/img/products/TortaFritas.jpeg`);
         })
 
         it("Producto Router Products en su método GET devuelve un Array de Productos", async function(){
@@ -88,7 +88,7 @@ describe("Pruebas Proyecto ECommerce", function(){
                                                     .attach("thumbnail",mockProducts.thumbnail)
             expect(ok).to.be.true;
             expect(body.payload).to.exist;
-            expect(fs.existsSync(`${__dirname}/public/img/TortaFritas.jpeg`)).to.be.true
+            expect(fs.existsSync(`${__dirname}/public/img/products/TortaFritas.jpeg`)).to.be.true
             expect(body.payload._id).to.exist;
             expect(body.payload.title).to.be.equal("Tortas Fritas");
             IDProducto = body.payload._id;
