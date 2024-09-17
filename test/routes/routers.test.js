@@ -1,10 +1,13 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import {afterEach, before, describe, it, beforeEach} from "mocha";
+import { before, describe, it } from "mocha";
 import supertest from "supertest-session";
 import {expect} from "chai";
 import fs from "fs";
 import { __dirname } from "../../src/utils.js";
 
+//Se puede ejecutar con: npm test 
+//En package.json en scripts:
+//"test": "mocha ./test/**/*.js --exit"
 
 const connDB = async() => {
     try {

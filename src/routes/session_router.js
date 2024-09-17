@@ -2,6 +2,9 @@ import { Router } from "express";
 import passport from "passport";
 import  auth from "../middleware/auth.js";
 import { UsuarioDTO } from "../dto/UsuarioDTO.js";
+import UsersMongoDAO from "../dao/UsersMongoDAO.js";
+
+let UsersDao = new UsersMongoDAO();
 
 const router = Router();
 
@@ -24,10 +27,13 @@ router.post("/registro", passport.authenticate("registro",{failureRedirect:"/api
 });
 
 router.post("/login", passport.authenticate("login",{failureRedirect:"/api/sessions/error"}), async(req, res) => {
-    let usuario = new UsuarioDTO({...req.user});
+    let usuario = req.user;
+    usuario.last_connection = new Date();
+
+    let usuarioActualizado = await UsersDao.updateUsuario(usuario._id, usuario);
+    usuario = new UsuarioDTO({...usuarioActualizado});    
     req.session.usuario = {...usuario};
-    //return res.status(200).redirect("/products");
-    
+
     res.setHeader("Content-Type","application/json");
     return res.status(200).json({status:"success", data:usuario});
 });

@@ -1,16 +1,117 @@
 import { Router } from "express";
 import { isValidObjectId } from "mongoose";
 import UsersMongoDAO from "../dao/UsersMongoDAO.js";
+import { CartsMongoDAO } from "../dao/CartsMongoDAO.js";
+import { ProductsMongoDAO } from "../dao/ProductsMongoDAO.js";
 import { uploaderDocuments } from "../utils.js";
 import fs from "fs";
+import { enviarMail } from "../utils.js";
 
 const userDAO = new UsersMongoDAO();
+const cartDAO = new CartsMongoDAO();
+const productDAO = new ProductsMongoDAO();
 
 const router = Router();
 
-router.get("/", (req, res)=>{
+router.delete("/", async(req, res) => {
+    let usuarios = await userDAO.getUsuarios();
+    let now = new Date();
+    let carritos = [];
+    let usuariosEliminados = [];
+    const MaximoSinConectar = (48*60*60*1000);
+
+    let superoTiempo = (user) => {
+        if( ((now.getTime() - user.last_connection.getTime()) > MaximoSinConectar)){ 
+            return true;
+        } else { return false; }
+    }
+
+    usuarios.forEach( async(user) => {
+        if (superoTiempo(user)){
+            carritos.push(user.cart); 
+            let mail = user.email;
+            let name = `${user.first_name} ${user.last_name}`;
+
+            console.log((now.getTime() - user.last_connection.getTime())/60000, "Minutos desde la última conexión",`El usuario con su correo ${mail} se eliminarán`);
+
+            try { 
+                let usuarioBorrado = await userDAO.deleteUsuario(user._id); 
+                if(usuarioBorrado){
+                    usuariosEliminados.push(mail);
+                    let enviado = await enviarMail(mail,"Aviso de Usuario Eliminado",`Estimado/a ${name} lo hemos eliminado de nuestra Base de Datos por no visitarnos por más de 48hs`);
+                    if(enviado.accepted.length > 0){ 
+                        req.logger.debug(`Usuario ${name} informado mediante mail a ${mail}`);
+                    }
+                } else { 
+                    req.logger.error(`No se logro borrar el usuario ${mail}`);
+                }
+            }
+            catch(error){
+                req.logger.error(error,`Error al intentar eliminar al usuario ${mail}`);
+            }
+        }
+    });
+
+    carritos.forEach( async(cart) => {
+        let carro = await cartDAO.getById_Populate(cart);
+
+        if(carro.products.length === 0){ //Si el carro no tiene productos
+            try { 
+                let carritoBorrado = await cartDAO.delete(carro._id);
+                if(carritoBorrado){
+                    req.logger.debug(`Carrito ${carro._id} estaba vacio y fue eliminado`);
+                }
+            }
+            catch(error){ 
+                req.logger.error(error, `Error al intentar borrar el carro ${carro._id}`);
+            }
+        } else { //Si el carro, si tiene productos
+
+            carro.products.forEach( async(produc) => {
+
+                if(produc.productId !== null){
+                    let _id = produc.productId._id;
+                    let cantidad = produc.quantity;
+                    
+                    try { 
+                        let productoActualizado = await productDAO.update(_id,{$inc:{stock:cantidad}});
+                        if(productoActualizado){
+                            req.logger.debug(`Producto ${_id} actualizado Correctamente`,productoActualizado);
+                        }
+                    }
+                    catch(error){
+                        req.logger.error(`Error al intentar actualizar producto: ${_id} por cantidad ${cantidad}`);
+                    }
+                } 
+            });
+
+            try { await cartDAO.delete(carro._id) }
+            catch(error){console.log(`Error al intentar eliminar carro ${carro._id}`)}
+
+        }
+    });
+    
     res.setHeader("Content-Type","application/json");
-    return res.status(400).json({"status":`Error, Debe ingresar un Id de usuario válido`});
+    return res.status(200).json({"status":`Se han eliminado ${usuariosEliminados.length} usuarios`});
+});
+
+router.get("/", async(req, res) => {
+    class UsuarioDTO {
+        constructor(usuario){
+            this.first_name = usuario.first_name;
+            this.last_name = usuario.last_name;
+            this.email = usuario.email;
+            this.rol = usuario.rol;
+        }
+    }
+    let usuarios = await userDAO.getUsuarios();
+    let usuariosDTO = usuarios.map(user => {
+        let usuarioDTO = new UsuarioDTO(user);
+        return {...usuarioDTO}
+    });
+
+    res.setHeader("Content-Type","application/json");
+    return res.status(200).json({"status":usuariosDTO});
 });
 
 router.post(`/:uid/documents`, uploaderDocuments.array(`documents`) , async(req, res) => {
