@@ -31,7 +31,7 @@ const cartsAuth = async (req, res, next) => {
         }
 
         if(usuario.cart != cid){
-            console.log("desde linea 34 igual llego aquí");
+            console.log("desde linea 34 igual llego aquí cartsAuth");
             res.setHeader("Content-Type","application/json");
             return res.status(400).json({"error":"Solo puede agregar productos a su propio carrito"});
         }

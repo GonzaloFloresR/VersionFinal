@@ -9,6 +9,8 @@ import { __dirname } from "../../src/utils.js";
 //En package.json en scripts:
 //"test": "mocha ./test/**/*.js --exit"
 
+//requiere que el usuario gonzalof@hotmail.com tenga rol=admin
+
 const connDB = async() => {
     try {
         await mongoose.connect(
@@ -37,7 +39,7 @@ describe("Pruebas Proyecto ECommerce", function(){
             this.timeout(10000);
                 let {body} =  await requester.post("/api/sessions/login")
                                             .send({"usuario":"gonzalof@hotmail.com","password":"1234"});
-                console.log("Usuario Conectado!!!")
+                console.log("Usuario Conectado!!!");
         });
 
         after(async function(){
@@ -106,7 +108,7 @@ describe("Pruebas Proyecto ECommerce", function(){
                 "stock": 10
             }
             let {body, ok} = await requester.put(`/api/products/${IDProducto}`)
-                                            .send(mockProduct); 
+                                            .send(mockProduct);
             expect(ok).to.be.true;
             expect(body.modificado).to.exist;
             expect(body.modificado.title).to.be.equal("Ricas Fried Cakes");
